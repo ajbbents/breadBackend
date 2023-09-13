@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/ajbbents/breadBackend/issues"
   },
-  "homepage": "https://github.com/ajbbents/breadBackend#readme"
+  "homepage": "https://github.com/ajbbents/breadBackend#readme",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }
