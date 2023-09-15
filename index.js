@@ -1,35 +1,57 @@
-const http = require('http'),
-  fs = require('fs'),
-  url = require('url');
+const express = require('express'),
+  morgan = require('morgan'),
+  bodyParser = require('body-parser'),
+  methodOverride = require('method-override');
 
-http.createServer((request, response) => {
-  let addr = request.url,
-    q = url.parse(addr, true),
-    filePath = '';
+const app = express();
 
-  fs.appendFile('log.txt', 'URL: ' + addr + '\nTimestamp: ' + new Date() + '\n\n', (err) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log('added to the log.');
-    }
-  });
+app.use(morgan('common'));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
-  if (q.pathname.includes('documentation')) {
-    filePath = (__dirname + '/documentation.html');
-  } else {
-    filePath = 'index.html';
-  }
+app.use(bodyParser.json());
+app.use(methodOverride());
 
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      throw err;
-    }
+// set up db
+let dailyBakes = [
+  {
+    name: 'Two Day Sourdough',
+    bakeNumber: 1,
+    leavener: 'levian'
+  },
+  {
+    name: 'Saturday White Bread',
+    bakeNumber: 2,
+    leavener: 'instant yeast'
+  },
+  {
+    name: 'Sourdough Crackers',
+    bakeNumber: 3,
+    leavener: 'levian'
+  },
+];
 
-    response.writeHead(200, { 'Content-Type': 'text/html' });
-    response.write(data);
-    response.end();
-  });
+// GET requests
+app.get('/', (req, res) => {
+  res.send('Welcome to Track that Bake');
+});
 
-}).listen(8080);
-console.log('my first node test server, running on port 8080');
+app.get('/documentation', (req, res) => {
+  res.sendFile('public/documentation.html', { root: __dirname });
+});
+
+app.get('/bakes', (req, res) => {
+  res.json(dailyBakes);
+});
+
+// error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Well crap, that did not work.');
+});
+
+// listen for requests
+app.listen(8080, () => {
+  console.log('app is listening on port 8080');
+});
